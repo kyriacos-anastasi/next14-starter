@@ -1,43 +1,56 @@
 import Image from "next/image";
 import styles from "./singlePost.module.css";
-const SinglePostPage = ({ params, searchParams }) => {
+import PostUser from "@/components/postUser/PostUser";
+import { Suspense } from "react";
+import { getPost } from "@/lib/data";
+
+// const getData = async (slug) => {
+//   const res = await fetch(`https://jsonplaceholder.typicode.com/posts/${slug}`);
+
+//   if (!res.ok) {
+//     throw new Error("Failed to fetch data");
+//   }
+//   return res.json();
+// };
+
+const SinglePostPage = async ({ params }) => {
   console.log(params);
-  console.log(searchParams);
+
+  const { slug } = params;
+  const post = await getPost(slug);
+
   return (
     <div className={styles.container}>
       <div className={styles.imgContainer}>
-        <Image
-          src="https://images.pexels.com/photos/25381433/pexels-photo-25381433/free-photo-of-tree-under-clear-sky.jpeg"
-          alt=""
-          className={styles.img}
-          fill
-        />
+        {post.img && (
+          <Image src={post.img} alt="" className={styles.img} fill />
+        )}
       </div>
       <div className={styles.textContainer}>
-        <h1 className={styles.title}>Single Post Title</h1>
+        <h1 className={styles.title}>{post?.title}</h1>
         <div className={styles.detail}>
-          <Image
-            width={50}
-            height={50}
-            src="https://images.pexels.com/photos/25381433/pexels-photo-25381433/free-photo-of-tree-under-clear-sky.jpeg"
-            alt=""
-            className={styles.avatar}
-          />
-          <div className={styles.detailText}>
-            <span className="styles.detailTitle">Author</span>
-            <span className="styles.detailValue">Davey Dave</span>
-          </div>
+          {/* {post.img && (
+            <Image
+              width={50}
+              height={50}
+              src={post.img}
+              alt=""
+              className={styles.avatar}
+            />
+          )} */}
+          {post && (
+            <Suspense fallback={<div>Loading...</div>}>
+              <PostUser userId={post.userId} />
+            </Suspense>
+          )}
           <div className={styles.detailText}>
             <span className="styles.detailTitle">Published</span>
-            <span className="styles.detailValue">01.01.2024</span>
+            <span className="styles.detailValue">
+              {post.createdAt.toString().slice(4, 16)}
+            </span>
           </div>
         </div>
-        <div className={styles.content}>
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Laborum quis
-          illum totam repellendus tenetur, molestiae, eos perferendis maxime
-          rerum incidunt nam atque quibusdam ipsa est. Aliquid officia inventore
-          suscipit molestias!
-        </div>
+        <div className={styles.content}>{post.desc}</div>
       </div>
     </div>
   );
